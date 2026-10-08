@@ -53,7 +53,7 @@
     if (promptBox) {
       const controls = Array.from(promptBox.querySelectorAll('button, [role="button"]'));
       const label = (el) => (el.getAttribute("aria-label") || el.innerText || "").trim();
-      const modeControl = controls.find(el => /^(?:image|images)$/i.test(label(el)));
+      const modeControl = controls.find(el => /^(?:image|images|hình ảnh|ảnh)$/i.test(label(el)));
       if (modeControl) {
         console.log("[Flow AI Auto] Chế độ Image đã được chọn.");
         return true;
@@ -71,7 +71,7 @@
           'flow-prompt-box-settings flow-toggles[aria-label="Mode"], .settings-content-overlay flow-toggles[aria-label="Mode"]'
         );
         const imageRadio = Array.from(modeGroup?.querySelectorAll('[role="radio"]') || []).find(el =>
-          /^(?:image|images)$/i.test((el.querySelector('.toggle-text')?.textContent || el.innerText?.split('\n').pop() || '').trim())
+          /^(?:image|images|hình ảnh|ảnh)$/i.test((el.querySelector('.toggle-text')?.textContent || el.innerText?.split('\n').pop() || '').trim())
         );
         if (imageRadio) {
           if (imageRadio.getAttribute('aria-checked') !== 'true') {
@@ -87,7 +87,7 @@
           '[role="menuitem"], [role="option"], .cdk-overlay-pane button, .cdk-overlay-pane mat-option, [role="menu"] button'
         );
         const imageChoice = Array.from(choices).find(el =>
-          /^image(?:\s|$)/i.test((el.innerText || el.getAttribute("aria-label") || "").trim()) &&
+          /^(?:image|hình ảnh|ảnh)(?:\s|$)/i.test((el.innerText || el.getAttribute("aria-label") || "").trim()) &&
           isVisible(el)
         );
         if (!imageChoice) {
@@ -104,7 +104,7 @@
     const listItems = Array.from(document.querySelectorAll("mat-list-item"));
     for (const item of listItems) {
       const text = item.innerText || "";
-      if (/images/i.test(text)) {
+      if (/(?:images|hình ảnh|ảnh)/i.test(text)) {
         item.click();
         console.log("[Flow AI Auto] Đã click tab Images.");
         await sleep(1000);
@@ -189,7 +189,7 @@
           const txt = (btn.innerText || btn.getAttribute("aria-label") || "").toLowerCase();
           const hasAddIcon = Array.from(btn.querySelectorAll("mat-icon")).some(icon => (icon.innerText || "").trim().toLowerCase() === "add");
 
-          if (hasAddIcon || txt.includes("add") || txt.includes("character")) {
+          if (hasAddIcon || txt.includes("add") || txt.includes("character") || txt.includes("thêm") || txt.includes("nhân vật")) {
             if (isVisible(btn)) {
               btn.click();
               await sleep(600);
@@ -207,7 +207,7 @@
       const allElements = Array.from(sideNav.querySelectorAll('*'));
       for (const el of allElements) {
         const text = (el.innerText || "").trim().toLowerCase();
-        if ((text === "characters" || text === "character") && el.children.length === 0) {
+        if ((text === "characters" || text === "character" || text === "nhân vật") && el.children.length === 0) {
           el.click();
           console.log("[Flow AI Auto] Đã click vào mục Characters trong side-nav.");
           charTabClicked = true;
@@ -218,7 +218,7 @@
 
       if (!charTabClicked) {
         const anyCharTab = Array.from(sideNav.querySelectorAll('[role="tab"], mat-list-item, button, .menu-item')).find(el => 
-          /characters?/i.test(el.innerText || "")
+          /(?:characters?|nhân vật)/i.test(el.innerText || "")
         );
         if (anyCharTab) {
           anyCharTab.click();
@@ -271,7 +271,7 @@
         console.log(`[Flow AI Auto] Đã chọn thành công nhân vật "${charName}" qua side-nav!`);
         return true;
       } else {
-        throw new Error(`Không tìm thấy nhân vật "${charName}" trong assets của project.`);
+        console.warn(`[Flow AI Auto] Không tìm thấy phần tử DOM cho nhân vật "${charName}", chuyển sang fallback gõ @...`);
       }
     }
 
@@ -322,7 +322,7 @@
     console.log(`[Flow AI Auto] Bắt đầu Scene ${sceneId}: character="${characterNames.join('; ')}", prompt=${prompt.substring(0, 60)}...`);
 
     // Flow mới giữ ingredient ngoài editor; Clear prompt xóa cả chữ và chip.
-    const clearPrompt = document.querySelector('flow-prompt-box button[aria-label="Clear prompt"], flow-base-prompt-box button[aria-label="Clear prompt"]');
+    const clearPrompt = document.querySelector('flow-prompt-box button[aria-label*="Clear" i], flow-prompt-box button[aria-label*="Xóa" i], flow-base-prompt-box button[aria-label*="Clear" i], flow-base-prompt-box button[aria-label*="Xóa" i]');
     if (isVisible(clearPrompt)) {
       clearPrompt.click();
       await sleep(200);
@@ -338,7 +338,7 @@
     // Xóa các tag/chip nhân vật cũ nếu còn tồn tại trong prompt box
     try {
       const removeButtons = document.querySelectorAll(
-        'flow-prompt-box button[aria-label*="Remove" i], flow-prompt-box [aria-label*="Delete" i], flow-prompt-box .mat-mdc-chip-remove, flow-prompt-box flow-chip-remove, flow-chip button'
+        'flow-prompt-box button[aria-label*="Remove" i], flow-prompt-box [aria-label*="Delete" i], flow-prompt-box button[aria-label*="Xóa" i], flow-prompt-box [aria-label*="Xóa" i], flow-prompt-box .mat-mdc-chip-remove, flow-prompt-box flow-chip-remove, flow-chip button'
       );
       for (const btn of removeButtons) {
         if (isVisible(btn)) {
@@ -374,13 +374,28 @@
       'flow-generate-icon-button',
       'flow-base-prompt-box flow-generate-icon-button button',
       'flow-prompt-box button[aria-label*="Generate" i]',
+      'flow-prompt-box button[aria-label*="Tạo" i]',
       'flow-base-prompt-box button[aria-label*="Generate" i]',
+      'flow-base-prompt-box button[aria-label*="Tạo" i]',
       'flow-prompt-box button[aria-label*="Create" i]',
-      'button[aria-label="Run" i]'
+      'button[aria-label="Run" i]',
+      'button[aria-label="Chạy" i]'
     ];
 
     updateProgress(index + 1, total, `Đang chờ nút Tạo ảnh cho ${sceneId}...`);
-    for (let attempt = 0; attempt < 20 && !submitButton && !shouldStop; attempt++) {
+    for (let attempt = 0; attempt < 1500 && !submitButton && !shouldStop; attempt++) {
+      if (attempt > 0 && attempt % 50 === 0) {
+        console.log(`[Flow AI Auto] Vẫn đang chờ nút Tạo ảnh... (${attempt * 0.2}s)`);
+      }
+
+      // Đảm bảo chữ đã được nhập vào, nếu ô nhập bị trống (do focus lỗi) thì gõ lại
+      let currentEditor = document.querySelector('.ProseMirror[contenteditable="true"]');
+      if (currentEditor && !(currentEditor.innerText || "").trim()) {
+        currentEditor.focus();
+        document.execCommand("insertText", false, textToInsert);
+        await sleep(300);
+      }
+
       for (const sel of submitSelectors) {
         try {
           const elements = document.querySelectorAll(sel);
@@ -395,6 +410,23 @@
           if (submitButton) break;
         } catch (e) {}
       }
+
+      // Fallback: Quét tất cả các nút trong hộp thoại, khử dấu tiếng Việt để so sánh
+      if (!submitButton) {
+        const allButtons = document.querySelectorAll('flow-prompt-box button, flow-base-prompt-box button');
+        for (const btn of allButtons) {
+          const text = (btn.innerText || btn.getAttribute("aria-label") || "").toLowerCase();
+          const normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // "tạo ảnh" -> "tao anh"
+          if (normalized.includes("tao") || normalized.includes("chay") || normalized.includes("generate") || normalized.includes("run") || normalized.includes("create")) {
+            if (!btn.disabled && isVisible(btn)) {
+              submitButton = btn;
+              console.log(`[Flow AI Auto] Nút tạo ảnh đã sẵn sàng qua text search fallback: ${text}`);
+              break;
+            }
+          }
+        }
+      }
+
       if (!submitButton) await sleep(200);
     }
 
@@ -437,6 +469,8 @@
       await selectImagesTab();
       if (shouldStop) { updateProgress(0, scenes.length, "Đã dừng.", "STOPPED"); isRunning = false; return; }
 
+      await configureSettings("16:9", "x1");
+
       // Tìm editor ProseMirror
       let editor = document.querySelector('.ProseMirror[contenteditable="true"]');
       if (!editor) {
@@ -469,107 +503,136 @@
     }
   }
 
-  // --- Đổi tên Cards theo ID Scenes ---
+  // --- Đổi tên Cards theo Vị Trí (Không dùng Search) ---
   async function runRenameWorkflow({ scenes }) {
     try {
       if (!scenes || scenes.length === 0) {
         throw new Error("Không có danh sách scenes để đổi tên.");
       }
 
-      const searchInput = document.querySelector('input.search-input');
-      if (!searchInput) {
-        throw new Error("Không tìm thấy ô tìm kiếm 'input.search-input' trên trang Google Flow!");
+      updateProgress(0, scenes.length, "Bắt đầu tiến trình đổi tên cards (theo vị trí)...");
+
+      // Xóa ô search nếu đang có chữ để đảm bảo Google Flow hiện toàn bộ ảnh
+      const clearBtn = document.querySelector('button[aria-label="Clear search input"], button[aria-label*="Xóa" i]');
+      if (clearBtn && isVisible(clearBtn)) {
+        clearBtn.click();
+        await sleep(1000);
+      }
+
+      const tiles = Array.from(document.querySelectorAll('flow-grid-tile-container'));
+      if (tiles.length === 0) {
+        throw new Error("Không tìm thấy card ảnh nào trên màn hình.");
       }
 
       let totalRenamed = 0;
-      updateProgress(0, scenes.length, "Bắt đầu tiến trình đổi tên cards...");
-
-      for (let idx = 0; idx < scenes.length; idx++) {
+      
+      for (let i = 0; i < tiles.length; i++) {
         if (shouldStop) {
-          updateProgress(idx, scenes.length, "Đã dừng tiến trình đổi tên.", "STOPPED");
+          updateProgress(totalRenamed, scenes.length, "Đã dừng tiến trình đổi tên.", "STOPPED");
           isRunning = false;
           return;
         }
+        
+        const tile = tiles[i];
+        const tileText = (tile.innerText || tile.textContent || "").toLowerCase();
+        
+        let matchedScene = null;
+        let sceneIndex = -1;
 
-        const scene = scenes[idx];
-        const sceneId = scene.id || `SC${idx + 1}`;
-        const prompt = (scene.prompt || "").trim();
-
-        if (!prompt) continue;
-
-        updateProgress(idx + 1, scenes.length, `Đang tìm: "${prompt.substring(0, 25)}..." (${idx + 1}/${scenes.length})`);
-        console.log(`[Flow AI Auto] Đang tìm kiếm prompt scene ${sceneId}: "${prompt}"`);
-
-        // 1. Nhập prompt vào ô search-input bằng execCommand
-        searchInput.focus();
-        document.execCommand('selectAll', false, null);
-        document.execCommand('delete', false, null);
-        document.execCommand('insertText', false, prompt);
-        searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
-        searchInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
-        await sleep(1500);
-
-        // 2. Tìm danh sách card kết quả
-        const tiles = Array.from(document.querySelectorAll('flow-grid-tile-container'));
-        console.log(`[Flow AI Auto] Tìm thấy ${tiles.length} card cho prompt "${prompt}"`);
-
-        for (let i = 0; i < tiles.length; i++) {
-          if (shouldStop) break;
-          const newName = i === 0 ? sceneId : `${sceneId}_${i}`;
-          const tile = tiles[i];
-
-          try {
-            // Hover lên tile
-            tile.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-            tile.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-            await sleep(200);
-
-            // Bấm nút More options
-            const moreBtn = tile.querySelector('button[aria-label="More options"]');
-            if (moreBtn) {
-              moreBtn.click();
-              await sleep(400);
-
-              // Tìm nút Rename trong menu
-              const menuButtons = Array.from(document.querySelectorAll('.cdk-overlay-pane button, [role="menuitem"]'));
-              const renameBtn = menuButtons.find(b => (b.innerText || "").toLowerCase().includes("rename"));
-              if (renameBtn) {
-                renameBtn.click();
-                await sleep(400);
-
-                // Điền tên mới vào ô input
-                const editInput = document.querySelector('input.editable-text-input.editing, .footer-left input');
-                if (editInput) {
-                  editInput.focus();
-                  document.execCommand('selectAll', false, null);
-                  document.execCommand('delete', false, null);
-                  document.execCommand('insertText', false, newName);
-                  editInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
-                  editInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
-                  console.log(`[Flow AI Auto] Đã đổi tên card ${i + 1} thành "${newName}"`);
-                  totalRenamed++;
-                  await sleep(600);
-                }
-              } else {
-                document.body.click();
+        for (let j = 0; j < scenes.length; j++) {
+          const scene = scenes[j];
+          if (!scene.prompt) continue;
+          
+          const cleanPrompt = scene.prompt.toLowerCase().replace(/[\r\n]+/g, ' ').trim();
+          // Lấy 30 ký tự đầu tiên để tìm kiếm (đề phòng UI cắt bớt text bằng dấu ...)
+          const promptPrefix = cleanPrompt.substring(0, 30);
+          
+          let found = false;
+          if (tileText.includes(promptPrefix)) {
+            found = true;
+          } else {
+            const allElements = tile.querySelectorAll('*');
+            for (const el of allElements) {
+              const alt = (el.getAttribute('alt') || '').toLowerCase();
+              const title = (el.getAttribute('title') || '').toLowerCase();
+              const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+              if (alt.includes(promptPrefix) || title.includes(promptPrefix) || ariaLabel.includes(promptPrefix)) {
+                found = true;
+                break;
               }
             }
-          } catch (e) {
-            console.error(`[Flow AI Auto] Lỗi đổi tên card ${i + 1}:`, e);
+          }
+          
+          if (found) {
+            matchedScene = scene;
+            sceneIndex = j;
+            break;
           }
         }
 
-        // 3. Xóa ô search
-        const clearBtn = document.querySelector('button[aria-label="Clear search input"]');
-        if (clearBtn) {
-          clearBtn.click();
-        } else {
-          searchInput.focus();
-          document.execCommand('selectAll', false, null);
-          document.execCommand('delete', false, null);
-          searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+        if (!matchedScene) {
+          console.log(`[Flow AI Auto] Bỏ qua card thứ ${i + 1} vì không khớp với bất kỳ scene nào.`);
+          continue;
         }
-        await sleep(800);
+
+        const sceneId = matchedScene.id || `SC${sceneIndex + 1}`;
+
+        // Kiểm tra xem thẻ đã có tên đúng chưa
+        const currentNameEl = tile.querySelector('.asset-title, .title, [class*="title"]');
+        const currentName = currentNameEl ? (currentNameEl.innerText || "").trim() : "";
+        if (currentName.startsWith(sceneId)) {
+           console.log(`[Flow AI Auto] Card thứ ${i + 1} đã có tên bắt đầu bằng ${sceneId}, bỏ qua.`);
+           continue;
+        }
+
+        updateProgress(totalRenamed + 1, scenes.length, `Đang đổi tên card khớp với ${sceneId}...`);
+        console.log(`[Flow AI Auto] Đang đổi tên thẻ thứ ${i + 1} thành ${sceneId}`);
+
+        try {
+          // Hover lên tile
+          tile.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+          tile.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+          await sleep(200);
+
+          // Bấm nút More options
+          const moreBtn = tile.querySelector('button[aria-label="More options"]') || Array.from(tile.querySelectorAll('button')).find(b => { const icon = b.querySelector('mat-icon'); return icon && icon.innerText.trim() === 'more_vert'; });
+          if (moreBtn) {
+            moreBtn.click();
+            await sleep(400);
+
+            // Tìm nút Rename trong menu
+            const menuButtons = Array.from(document.querySelectorAll('.cdk-overlay-pane button, [role="menuitem"]'));
+            const renameBtn = menuButtons.find(b => {
+              const txt = (b.innerText || "").toLowerCase();
+              const icon = b.querySelector('mat-icon');
+              const iconTxt = icon ? (icon.innerText || "").trim().toLowerCase() : "";
+              return txt.includes("rename") || txt.includes("đổi tên") || iconTxt === "edit";
+            });
+            
+            if (renameBtn) {
+              renameBtn.click();
+              await sleep(400);
+
+              // Điền tên mới vào ô input
+              const editInput = document.querySelector('input.editable-text-input.editing, .footer-left input');
+              if (editInput) {
+                editInput.focus();
+                document.execCommand('selectAll', false, null);
+                document.execCommand('delete', false, null);
+                document.execCommand('insertText', false, sceneId);
+                editInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+                editInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+                console.log(`[Flow AI Auto] Đã đổi tên thành "${sceneId}"`);
+                totalRenamed++;
+                await sleep(600);
+              }
+            } else {
+              document.body.click(); // Đóng menu nếu không thấy nút rename
+            }
+          }
+        } catch (e) {
+          console.error(`[Flow AI Auto] Lỗi đổi tên card ${i}:`, e);
+        }
       }
 
       updateProgress(scenes.length, scenes.length, `🎉 Đã đổi tên thành công ${totalRenamed} card!`, "COMPLETED");

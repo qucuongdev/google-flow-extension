@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // Đọc lại tọa độ sau khi attach vì thanh thông báo debugger có thể đổi viewport.
       const position = await chrome.debugger.sendCommand(target, "Runtime.evaluate", {
         expression: `(() => {
-          const buttons = document.querySelectorAll('flow-prompt-box flow-generate-icon-button button[aria-label="Start generation"], flow-generate-icon-button button[type="submit"]');
+          const buttons = document.querySelectorAll('flow-prompt-box flow-generate-icon-button button, flow-generate-icon-button button[type="submit"]');
           const button = Array.from(buttons).find(el => !el.disabled && el.getClientRects().length > 0);
           if (!button) return null;
           const rect = button.getBoundingClientRect();

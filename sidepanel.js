@@ -37,14 +37,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Handle sample file download
+  // Handle sample file download (AI Prompt Template)
   if (downloadSampleBtn) {
     downloadSampleBtn.addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(SAMPLE_SCENES, null, 2)], { type: "application/json;charset=utf-8" });
+      const sampleJson = JSON.stringify(SAMPLE_SCENES, null, 2);
+      const promptTemplate = `Bạn là một chuyên gia tạo prompt hình ảnh AI và kịch bản video. 
+Tôi có một kịch bản, hãy chuyển đổi kịch bản này thành định dạng JSON chuẩn để tôi sử dụng tự động hóa tạo ảnh trên Google Flow.
+
+YÊU CẦU:
+1. Chia kịch bản của tôi thành các cảnh (scenes).
+2. Trả về kết quả DUY NHẤT là một mảng JSON (không có markdown hay text dư thừa).
+3. Mỗi cảnh trong JSON phải tuân thủ đúng cấu trúc:
+   - "id": Mã cảnh (VD: "SC01", "SC02").
+   - "character": Tên nhân vật (phải khớp với tên Asset trên Google Flow). Nếu không có nhân vật, để chuỗi rỗng "". Nhiều nhân vật cách nhau bằng dấu chấm phẩy (;).
+   - "character_info": Mô tả ngắn gọn ngoại hình nhân vật.
+   - "prompt": Câu lệnh miêu tả cảnh để AI vẽ (ghi rõ tỷ lệ 16:9, màu sắc, bố cục, góc máy). Nếu có nhân vật, phải có câu mở đầu "Dùng ảnh đính kèm làm tham chiếu nhân vật...". Không có chữ/watermark.
+   - "subtitle_ids": Mảng các số nguyên tương ứng ID phụ đề.
+
+MẪU JSON CHUẨN ĐỂ HỌC THEO:
+${sampleJson}
+
+---
+DƯỚI ĐÂY LÀ KỊCH BẢN CỦA TÔI (Hãy chuyển thành JSON như mẫu trên):
+[DÁN KỊCH BẢN CỦA BẠN VÀO ĐÂY]`;
+
+      const blob = new Blob([promptTemplate], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "scenes_sample.json";
+      a.download = "Prompt_Tao_Kich_Ban_Flow.txt";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
